@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
-import { 
-    Search, Filter, MoreVertical, Coins, Ban, LogIn, CheckCircle, XCircle, 
+import {
+    Search, Filter, MoreVertical, Coins, Ban, LogIn, CheckCircle, XCircle,
     ArrowUpRight, ArrowDownLeft, Loader2, RefreshCw, AlertTriangle
 } from 'lucide-react';
 import { adminService } from '../services/adminService';
@@ -30,12 +30,12 @@ export const AdminClients: React.FC = () => {
         try {
             const data = await adminService.getClients();
             setClients(data);
-        } catch (e) { console.error(e); } 
+        } catch (e) { console.error(e); }
         finally { setLoading(false); }
     };
 
     const handleImpersonate = (client: SaaSUser) => {
-        if(window.confirm(`⚠️ Security Warning\n\nYou are about to log in as ${client.name}.\nAll actions will be recorded in the audit log.\n\nContinue?`)) {
+        if (window.confirm(`⚠️ Security Warning\n\nYou are about to log in as ${client.name}.\nAll actions will be recorded in the audit log.\n\nContinue?`)) {
             localStorage.setItem('wati_user', JSON.stringify(client));
             window.location.href = '/';
         }
@@ -56,17 +56,17 @@ export const AdminClients: React.FC = () => {
         setIsProcessing(true);
         const amount = parseFloat(creditAmount);
         const finalAmount = creditType === 'ADD' ? amount : -amount;
-        
+
         try {
             const admin = authService.getCurrentUser();
             // Call API
             const response = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:3000'}/api/users/${selectedClient.id}/credits`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    amount: finalAmount, 
+                body: JSON.stringify({
+                    amount: finalAmount,
                     reason: creditReason || 'Manual Adjustment',
-                    adminId: admin?.id 
+                    adminId: admin?.id
                 })
             });
 
@@ -84,7 +84,7 @@ export const AdminClients: React.FC = () => {
 
     const toggleStatus = async (client: SaaSUser) => {
         const newStatus = client.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
-        if(!window.confirm(`Change status of ${client.name} to ${newStatus}?`)) return;
+        if (!window.confirm(`Change status of ${client.name} to ${newStatus}?`)) return;
 
         try {
             await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:3000'}/api/users/${client.id}/status`, {
@@ -93,11 +93,11 @@ export const AdminClients: React.FC = () => {
                 body: JSON.stringify({ status: newStatus })
             });
             loadClients();
-        } catch(e) { alert("Failed to change status"); }
+        } catch (e) { alert("Failed to change status"); }
     };
 
-    const filtered = clients.filter(c => 
-        c.name.toLowerCase().includes(filter.toLowerCase()) || 
+    const filtered = clients.filter(c =>
+        c.name.toLowerCase().includes(filter.toLowerCase()) ||
         c.email.toLowerCase().includes(filter.toLowerCase())
     );
 
@@ -109,7 +109,7 @@ export const AdminClients: React.FC = () => {
                     <p className="text-gray-500">Manage tenants, wallet balances, and access control</p>
                 </div>
                 <div className="flex gap-2">
-                    <button onClick={loadClients} className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg"><RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin':''}`}/></button>
+                    <button onClick={loadClients} className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg"><RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} /></button>
                     <button className="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:bg-slate-800 transition-colors">Add Client</button>
                 </div>
             </div>
@@ -118,9 +118,9 @@ export const AdminClients: React.FC = () => {
                 <div className="p-4 border-b border-gray-200 bg-gray-50 flex gap-4">
                     <div className="relative flex-1 max-w-md">
                         <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                        <input 
-                            type="text" 
-                            placeholder="Search by name, email or ID..." 
+                        <input
+                            type="text"
+                            placeholder="Search by name, email or ID..."
                             value={filter}
                             onChange={e => setFilter(e.target.value)}
                             className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
@@ -159,7 +159,7 @@ export const AdminClients: React.FC = () => {
                                     <td className="px-6 py-4">
                                         <button onClick={() => toggleStatus(client)} className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border transition-colors
                                             ${client.status === 'ACTIVE' ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'}`}>
-                                            {client.status === 'ACTIVE' ? <CheckCircle className="w-3 h-3"/> : <XCircle className="w-3 h-3"/>}
+                                            {client.status === 'ACTIVE' ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
                                             {client.status}
                                         </button>
                                     </td>
@@ -171,27 +171,27 @@ export const AdminClients: React.FC = () => {
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2">
                                             <span className="font-mono font-bold text-gray-900 text-base">₹{client.credits?.toLocaleString()}</span>
-                                            {client.credits < 100 && <AlertTriangle className="w-4 h-4 text-orange-500" title="Low Balance" />}
+                                            {client.credits < 100 && <AlertTriangle className="w-4 h-4 text-orange-500" />}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex justify-end gap-1">
-                                            <button 
-                                                onClick={() => openCreditModal(client)} 
-                                                className="p-2 text-green-600 hover:bg-green-50 rounded-lg flex items-center gap-1 text-xs font-medium transition-colors" 
+                                            <button
+                                                onClick={() => openCreditModal(client)}
+                                                className="p-2 text-green-600 hover:bg-green-50 rounded-lg flex items-center gap-1 text-xs font-medium transition-colors"
                                                 title="Manage Wallet"
                                             >
                                                 <Coins className="w-4 h-4" /> Add Credit
                                             </button>
                                             <div className="w-px h-6 bg-gray-200 mx-1 self-center"></div>
-                                            <button 
-                                                onClick={() => handleImpersonate(client)} 
-                                                className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors" 
+                                            <button
+                                                onClick={() => handleImpersonate(client)}
+                                                className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
                                                 title="Log In As Client"
                                             >
                                                 <LogIn className="w-4 h-4" />
                                             </button>
-                                            <button 
+                                            <button
                                                 className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
                                                 title="More Actions"
                                             >
@@ -217,7 +217,7 @@ export const AdminClients: React.FC = () => {
                             </div>
                             <button onClick={() => setIsCreditModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">✕</button>
                         </div>
-                        
+
                         <form onSubmit={handleSubmitCredit} className="p-6 space-y-5">
                             {/* Balance Display */}
                             <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg p-4 text-white flex justify-between items-center shadow-md">
@@ -248,8 +248,8 @@ export const AdminClients: React.FC = () => {
                                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Amount (INR)</label>
                                 <div className="relative">
                                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">₹</span>
-                                    <input 
-                                        type="number" 
+                                    <input
+                                        type="number"
                                         min="1"
                                         step="0.01"
                                         required
@@ -264,8 +264,8 @@ export const AdminClients: React.FC = () => {
                             {/* Reason */}
                             <div>
                                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Reason / Reference</label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     required
                                     value={creditReason}
                                     onChange={(e) => setCreditReason(e.target.value)}
@@ -275,14 +275,14 @@ export const AdminClients: React.FC = () => {
                             </div>
 
                             <div className="pt-2">
-                                <button 
-                                    type="submit" 
+                                <button
+                                    type="submit"
                                     disabled={isProcessing}
                                     className={`w-full py-3 rounded-lg text-white font-bold flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed
                                         ${creditType === 'ADD' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}
                                     `}
                                 >
-                                    {isProcessing ? <Loader2 className="animate-spin w-5 h-5"/> : (creditType === 'ADD' ? <Coins className="w-5 h-5"/> : <Ban className="w-5 h-5"/>)}
+                                    {isProcessing ? <Loader2 className="animate-spin w-5 h-5" /> : (creditType === 'ADD' ? <Coins className="w-5 h-5" /> : <Ban className="w-5 h-5" />)}
                                     {creditType === 'ADD' ? 'Process Credit' : 'Process Deduction'}
                                 </button>
                             </div>
