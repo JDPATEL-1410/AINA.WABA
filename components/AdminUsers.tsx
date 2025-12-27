@@ -8,6 +8,7 @@ import {
 import { authService } from '../services/authService';
 import { billingService } from '../services/billingService';
 import { SaaSUser, SubscriptionPlan } from '../types';
+import { API_BASE_URL } from '../services/apiConfig';
 
 export const AdminUsers: React.FC = () => {
     const [users, setUsers] = useState<SaaSUser[]>([]);
@@ -99,7 +100,7 @@ export const AdminUsers: React.FC = () => {
         if (!window.confirm(`Are you sure you want to ${action} this user?`)) return;
 
         try {
-            const baseUrl = (import.meta as any).env.VITE_API_URL || 'http://localhost:3000';
+            const baseUrl = API_BASE_URL;
             const response = await fetch(`${baseUrl}/api/users/${user.id}/status`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -135,7 +136,7 @@ export const AdminUsers: React.FC = () => {
 
         try {
             const admin = authService.getCurrentUser();
-            const baseUrl = (import.meta as any).env.VITE_API_URL || 'http://localhost:3000';
+            const baseUrl = API_BASE_URL;
 
             const response = await fetch(`${baseUrl}/api/users/${selectedUserForCredit.id}/credits`, {
                 method: 'POST',

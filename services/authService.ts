@@ -1,15 +1,7 @@
-
 import { SaaSUser } from '../types';
+import { API_BASE_URL } from './apiConfig';
 
-// Fix: Safe access to import.meta.env using optional chaining
-const getBaseUrl = () => {
-    const env = (import.meta as any).env;
-    if (env?.VITE_API_URL) return env.VITE_API_URL + '/api';
-    if (env?.PROD) return '/api';
-    return 'http://localhost:3000/api';
-};
-
-const BACKEND_URL = getBaseUrl();
+const BACKEND_URL = `${API_BASE_URL}/api`;
 const LOCAL_STORAGE_USERS_KEY = 'waticlone_mock_users';
 
 const MOCK_ADMIN: SaaSUser = {
@@ -63,35 +55,35 @@ export const authService = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             });
-            
+
             if (!response.ok) {
                 const data = await response.json().catch(() => ({}));
                 // Only throw if 401/403, if 404 or 5xx let fallback handle it if network error
-                if(response.status === 401 || response.status === 403) {
-                     throw new Error(data.error || 'Invalid credentials');
+                if (response.status === 401 || response.status === 403) {
+                    throw new Error(data.error || 'Invalid credentials');
                 }
                 throw new Error("Network/Server Error");
             }
-            
+
             const user = await response.json();
             localStorage.setItem('wati_user', JSON.stringify(user));
             return user;
         } catch (e: any) {
             // 3. Fallback: Only if it's a NETWORK error or 503
             const isNetworkError = e.message.includes('Failed to fetch') || e.message.includes('NetworkError') || e.message.includes('Connection refused') || e.message.includes('Network/Server Error');
-            
+
             if (isNetworkError) {
                 console.warn("Backend unreachable. Checking local mock storage for authentication.");
-                
+
                 const localUsers = getLocalUsers();
                 const foundUser = localUsers.find(u => u.email === email && u.password === password);
-                
+
                 if (foundUser) {
                     const { password: _, ...safeUser } = foundUser;
                     localStorage.setItem('wati_user', JSON.stringify(safeUser));
                     return safeUser;
                 }
-                
+
                 // If not found locally either
                 throw new Error("Login failed. Backend is offline and user not found locally.");
             }
@@ -113,7 +105,7 @@ export const authService = {
     },
 
     // --- USER MANAGEMENT (RESELLER) ---
-    
+
     getUsers: async (): Promise<SaaSUser[]> => {
         try {
             const response = await fetch(`${BACKEND_URL}/users`);
@@ -132,27 +124,27 @@ export const authService = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...user, password, credits: 0 })
             });
-            if(!response.ok) throw new Error("Failed to create user");
+            if (!response.ok) throw new Error("Failed to create user");
             return await response.json();
         } catch (e: any) {
-             // Fallback: Save to local storage if server is down
-             if (e.message.includes('Failed to fetch') || e.message.includes('NetworkError')) {
-                 const newUser = {
+            // Fallback: Save to local storage if server is down
+            if (e.message.includes('Failed to fetch') || e.message.includes('NetworkError')) {
+                const newUser = {
                     ...user,
                     id: Math.random().toString(36).substr(2, 9),
                     password, // Store password locally for mock auth
                     credits: 0,
                     status: 'ACTIVE',
                     createdAt: new Date().toISOString()
-                 };
-                 const users = getLocalUsers();
-                 users.push(newUser);
-                 localStorage.setItem(LOCAL_STORAGE_USERS_KEY, JSON.stringify(users));
-                 
-                 const { password: _, ...safeUser } = newUser as any;
-                 return safeUser;
-             }
-             throw e;
+                };
+                const users = getLocalUsers();
+                users.push(newUser);
+                localStorage.setItem(LOCAL_STORAGE_USERS_KEY, JSON.stringify(users));
+
+                const { password: _, ...safeUser } = newUser as any;
+                return safeUser;
+            }
+            throw e;
         }
     },
 
@@ -160,12 +152,12 @@ export const authService = {
         try {
             await fetch(`${BACKEND_URL}/users/${userId}`, { method: 'DELETE' });
         } catch (e: any) {
-             if (e.message.includes('Failed to fetch') || e.message.includes('NetworkError')) {
-                 const users = getLocalUsers().filter(u => u.id !== userId);
-                 localStorage.setItem(LOCAL_STORAGE_USERS_KEY, JSON.stringify(users));
-                 return;
-             }
-             throw e;
+            if (e.message.includes('Failed to fetch') || e.message.includes('NetworkError')) {
+                const users = getLocalUsers().filter(u => u.id !== userId);
+                localStorage.setItem(LOCAL_STORAGE_USERS_KEY, JSON.stringify(users));
+                return;
+            }
+            throw e;
         }
     },
 
@@ -178,20 +170,20 @@ export const authService = {
             });
             if (!response.ok) throw new Error("Failed to update credits");
         } catch (e: any) {
-             // Fallback: Update local storage if server is down
-             const isNetworkError = e.message.includes('Failed to fetch') || e.message.includes('NetworkError') || e.message.includes('Connection refused');
-             
-             if (isNetworkError) {
-                 const users = getLocalUsers();
-                 const idx = users.findIndex(u => u.id === userId);
-                 if (idx >= 0) {
-                     users[idx].credits = (users[idx].credits || 0) + amount;
-                     localStorage.setItem(LOCAL_STORAGE_USERS_KEY, JSON.stringify(users));
-                     console.log("Local credits updated for user", userId, "New Balance:", users[idx].credits);
-                     return;
-                 }
-             }
-             throw e;
+            // Fallback: Update local storage if server is down
+            const isNetworkError = e.message.includes('Failed to fetch') || e.message.includes('NetworkError') || e.message.includes('Connection refused');
+
+            if (isNetworkError) {
+                const users = getLocalUsers();
+                const idx = users.findIndex(u => u.id === userId);
+                if (idx >= 0) {
+                    users[idx].credits = (users[idx].credits || 0) + amount;
+                    localStorage.setItem(LOCAL_STORAGE_USERS_KEY, JSON.stringify(users));
+                    console.log("Local credits updated for user", userId, "New Balance:", users[idx].credits);
+                    return;
+                }
+            }
+            throw e;
         }
     }
 };

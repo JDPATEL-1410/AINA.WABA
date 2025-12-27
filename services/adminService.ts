@@ -1,21 +1,16 @@
 
 import { SaaSUser, AuditLog, WebhookLog } from '../types';
 
-const getBaseUrl = () => {
-    const env = (import.meta as any).env;
-    if (env?.VITE_API_URL) return env.VITE_API_URL + '/api';
-    if (env?.PROD) return '/api';
-    return 'http://localhost:3000/api';
-};
+import { API_BASE_URL } from './apiConfig';
 
-const BACKEND_URL = getBaseUrl();
+const BACKEND_URL = `${API_BASE_URL}/api`;
 
 export const adminService = {
     getStats: async () => {
         try {
             const res = await fetch(`${BACKEND_URL}/admin/stats`);
             return await res.json();
-        } catch(e) { 
+        } catch (e) {
             // Fallback for demo
             return {
                 totalUsers: 120,
@@ -31,9 +26,9 @@ export const adminService = {
     getClients: async (): Promise<SaaSUser[]> => {
         try {
             const res = await fetch(`${BACKEND_URL}/admin/users`);
-            if(!res.ok) throw new Error("Failed");
+            if (!res.ok) throw new Error("Failed");
             return await res.json();
-        } catch(e) {
+        } catch (e) {
             // Mock for demo if backend is down
             return [
                 { id: '1', name: 'Acme Corp', email: 'contact@acme.com', role: 'USER', plan: 'ENTERPRISE', status: 'ACTIVE', credits: 4500, createdAt: new Date().toISOString() },
@@ -46,13 +41,13 @@ export const adminService = {
         try {
             const res = await fetch(`${BACKEND_URL}/admin/audit-logs`);
             return await res.json();
-        } catch(e) { return []; }
+        } catch (e) { return []; }
     },
 
     getWebhookLogs: async (): Promise<WebhookLog[]> => {
         try {
             const res = await fetch(`${BACKEND_URL}/admin/webhook-logs`);
             return await res.json();
-        } catch(e) { return []; }
+        } catch (e) { return []; }
     }
 };

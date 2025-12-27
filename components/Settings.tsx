@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { whatsappApiService } from '../services/whatsappApiService';
 import { authService } from '../services/authService';
+import { API_BASE_URL } from '../services/apiConfig';
 import { ApiCredentials, WhatsAppPhoneNumber, BusinessProfile } from '../types';
 
 declare global {
@@ -88,7 +89,6 @@ export const Settings: React.FC = () => {
         }
     }, []);
 
-    const getBaseUrl = () => (import.meta as any).env.VITE_API_URL || 'http://localhost:3000';
 
     // --- TAB 1: CONNECT FACEBOOK ---
     const launchWhatsAppSignup = () => {
@@ -172,7 +172,7 @@ export const Settings: React.FC = () => {
 
     const exchangeToken = async (code: string, userId: string) => {
         try {
-            const response = await fetch(`${getBaseUrl()}/api/auth/exchange-token`, {
+            const response = await fetch(`${API_BASE_URL}/api/whatsapp/exchange-token`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code, userId })
@@ -195,7 +195,7 @@ export const Settings: React.FC = () => {
 
     const fetchPhoneNumbers = async (wabaId: string, accessToken: string) => {
         try {
-            const response = await fetch(`${getBaseUrl()}/api/whatsapp/phone-numbers?wabaId=${wabaId}`);
+            const response = await fetch(`${API_BASE_URL}/api/whatsapp/phone-numbers?wabaId=${wabaId}`);
             const data = await response.json();
             if (data.data) {
                 setAvailablePhones(data.data);
@@ -221,7 +221,7 @@ export const Settings: React.FC = () => {
         if (!selectedPhone || !registrationPin || registrationPin.length !== 6) return;
         setIsProcessing(true);
         try {
-            const response = await fetch(`${getBaseUrl()}/api/whatsapp/register-phone`, {
+            const response = await fetch(`${API_BASE_URL}/api/whatsapp/register-phone`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phoneId: selectedPhone.id, pin: registrationPin })

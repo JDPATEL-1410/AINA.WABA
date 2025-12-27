@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { CreditCard, Plus, Trash2, Tag, Loader2, DollarSign, Package, Check, Layers, Coins } from 'lucide-react';
 import { billingService } from '../services/billingService';
 import { CreditPack, SubscriptionPlan } from '../types';
+import { API_BASE_URL } from '../services/apiConfig';
 
 export const AdminPlans: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'SUBSCRIPTION' | 'CREDITS'>('SUBSCRIPTION');
@@ -11,11 +12,11 @@ export const AdminPlans: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [creating, setCreating] = useState(false);
-    
+
     // New Forms - Defaults to INR
     const [newPack, setNewPack] = useState({ name: '', credits: 1000, price: 500, currency: 'INR', is_popular: false });
-    const [newPlan, setNewPlan] = useState({ 
-        name: '', price: 999, currency: 'INR', contact_limit: 1000, daily_message_limit: 500, features: '' 
+    const [newPlan, setNewPlan] = useState({
+        name: '', price: 999, currency: 'INR', contact_limit: 1000, daily_message_limit: 500, features: ''
     });
 
     useEffect(() => {
@@ -38,13 +39,12 @@ export const AdminPlans: React.FC = () => {
         }
     };
 
-    const getApiUrl = () => (import.meta as any).env.VITE_API_URL || 'http://localhost:3000';
 
     const handleCreatePack = async (e: React.FormEvent) => {
         e.preventDefault();
         setCreating(true);
         try {
-            await fetch(`${getApiUrl()}/api/billing/packs`, {
+            await fetch(`${API_BASE_URL}/api/billing/packs`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newPack)
@@ -59,7 +59,7 @@ export const AdminPlans: React.FC = () => {
         e.preventDefault();
         setCreating(true);
         try {
-            await fetch(`${getApiUrl()}/api/billing/plans`, {
+            await fetch(`${API_BASE_URL}/api/billing/plans`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -74,9 +74,9 @@ export const AdminPlans: React.FC = () => {
     };
 
     const handleDelete = async (id: string | number, type: 'pack' | 'plan') => {
-        if(!window.confirm(`Delete this ${type}?`)) return;
+        if (!window.confirm(`Delete this ${type}?`)) return;
         try {
-            await fetch(`${getApiUrl()}/api/billing/${type}s/${id}`, { method: 'DELETE' });
+            await fetch(`${API_BASE_URL}/api/billing/${type}s/${id}`, { method: 'DELETE' });
             loadData();
         } catch (e) { alert("Failed to delete"); }
     };
@@ -88,7 +88,7 @@ export const AdminPlans: React.FC = () => {
                     <h1 className="text-2xl font-bold text-gray-900">Manage Plans & Pricing</h1>
                     <p className="text-gray-500">Configure subscription tiers and credit top-ups</p>
                 </div>
-                <button 
+                <button
                     onClick={() => setIsModalOpen(true)}
                     className="flex items-center gap-2 bg-wa text-white px-4 py-2 rounded-lg hover:bg-wa-dark transition-colors font-medium shadow-sm"
                 >
@@ -142,39 +142,39 @@ export const AdminPlans: React.FC = () => {
                             <tbody className="divide-y divide-gray-100">
                                 {activeTab === 'SUBSCRIPTION' ? (
                                     plans.length === 0 ? <tr><td colSpan={5} className="p-6 text-center text-gray-500">No active plans.</td></tr> :
-                                    plans.map((plan) => (
-                                        <tr key={plan.id} className="hover:bg-gray-50">
-                                            <td className="px-6 py-4 font-bold text-gray-900">{plan.name}</td>
-                                            <td className="px-6 py-4 text-green-600 font-medium">₹{plan.price}</td>
-                                            <td className="px-6 py-4">
-                                                <div className="text-xs text-gray-500">
-                                                    <div>Contacts: <span className="font-mono font-bold text-gray-700">{plan.contact_limit}</span></div>
-                                                    <div>Daily Msgs: <span className="font-mono font-bold text-gray-700">{plan.daily_message_limit}</span></div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-xs text-gray-500 max-w-xs truncate">
-                                                {plan.features?.join(', ')}
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <button onClick={() => handleDelete(plan.id, 'plan')} className="text-red-500 hover:bg-red-50 p-2 rounded transition-colors"><Trash2 className="w-4 h-4" /></button>
-                                            </td>
-                                        </tr>
-                                    ))
+                                        plans.map((plan) => (
+                                            <tr key={plan.id} className="hover:bg-gray-50">
+                                                <td className="px-6 py-4 font-bold text-gray-900">{plan.name}</td>
+                                                <td className="px-6 py-4 text-green-600 font-medium">₹{plan.price}</td>
+                                                <td className="px-6 py-4">
+                                                    <div className="text-xs text-gray-500">
+                                                        <div>Contacts: <span className="font-mono font-bold text-gray-700">{plan.contact_limit}</span></div>
+                                                        <div>Daily Msgs: <span className="font-mono font-bold text-gray-700">{plan.daily_message_limit}</span></div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 text-xs text-gray-500 max-w-xs truncate">
+                                                    {plan.features?.join(', ')}
+                                                </td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <button onClick={() => handleDelete(plan.id, 'plan')} className="text-red-500 hover:bg-red-50 p-2 rounded transition-colors"><Trash2 className="w-4 h-4" /></button>
+                                                </td>
+                                            </tr>
+                                        ))
                                 ) : (
                                     packs.length === 0 ? <tr><td colSpan={5} className="p-6 text-center text-gray-500">No active packs.</td></tr> :
-                                    packs.map((pack) => (
-                                        <tr key={pack.id} className="hover:bg-gray-50">
-                                            <td className="px-6 py-4 font-medium text-gray-900">{pack.name}</td>
-                                            <td className="px-6 py-4 font-mono">{pack.credits.toLocaleString()}</td>
-                                            <td className="px-6 py-4 font-medium text-green-600">₹{pack.price}</td>
-                                            <td className="px-6 py-4">
-                                                {pack.popular && <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full font-bold flex items-center w-fit gap-1"><Tag className="w-3 h-3" /> POPULAR</span>}
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <button onClick={() => handleDelete(pack.id, 'pack')} className="text-red-500 hover:bg-red-50 p-2 rounded transition-colors"><Trash2 className="w-4 h-4" /></button>
-                                            </td>
-                                        </tr>
-                                    ))
+                                        packs.map((pack) => (
+                                            <tr key={pack.id} className="hover:bg-gray-50">
+                                                <td className="px-6 py-4 font-medium text-gray-900">{pack.name}</td>
+                                                <td className="px-6 py-4 font-mono">{pack.credits.toLocaleString()}</td>
+                                                <td className="px-6 py-4 font-medium text-green-600">₹{pack.price}</td>
+                                                <td className="px-6 py-4">
+                                                    {pack.popular && <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full font-bold flex items-center w-fit gap-1"><Tag className="w-3 h-3" /> POPULAR</span>}
+                                                </td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <button onClick={() => handleDelete(pack.id, 'pack')} className="text-red-500 hover:bg-red-50 p-2 rounded transition-colors"><Trash2 className="w-4 h-4" /></button>
+                                                </td>
+                                            </tr>
+                                        ))
                                 )}
                             </tbody>
                         </table>
@@ -194,52 +194,52 @@ export const AdminPlans: React.FC = () => {
                                 <>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Plan Name</label>
-                                        <input required type="text" value={newPlan.name} onChange={e => setNewPlan({...newPlan, name: e.target.value})} className="w-full border rounded-lg p-2.5 text-sm" placeholder="e.g. ENTERPRISE" />
+                                        <input required type="text" value={newPlan.name} onChange={e => setNewPlan({ ...newPlan, name: e.target.value })} className="w-full border rounded-lg p-2.5 text-sm" placeholder="e.g. ENTERPRISE" />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Price (Monthly ₹)</label>
-                                            <input required type="number" value={newPlan.price} onChange={e => setNewPlan({...newPlan, price: parseFloat(e.target.value)})} className="w-full border rounded-lg p-2.5 text-sm" />
+                                            <input required type="number" value={newPlan.price} onChange={e => setNewPlan({ ...newPlan, price: parseFloat(e.target.value) })} className="w-full border rounded-lg p-2.5 text-sm" />
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Contact Limit</label>
-                                            <input required type="number" value={newPlan.contact_limit} onChange={e => setNewPlan({...newPlan, contact_limit: parseInt(e.target.value)})} className="w-full border rounded-lg p-2.5 text-sm" />
+                                            <input required type="number" value={newPlan.contact_limit} onChange={e => setNewPlan({ ...newPlan, contact_limit: parseInt(e.target.value) })} className="w-full border rounded-lg p-2.5 text-sm" />
                                         </div>
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Daily Message Limit</label>
-                                        <input required type="number" value={newPlan.daily_message_limit} onChange={e => setNewPlan({...newPlan, daily_message_limit: parseInt(e.target.value)})} className="w-full border rounded-lg p-2.5 text-sm" />
+                                        <input required type="number" value={newPlan.daily_message_limit} onChange={e => setNewPlan({ ...newPlan, daily_message_limit: parseInt(e.target.value) })} className="w-full border rounded-lg p-2.5 text-sm" />
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Features (comma separated)</label>
-                                        <textarea value={newPlan.features} onChange={e => setNewPlan({...newPlan, features: e.target.value})} className="w-full border rounded-lg p-2.5 text-sm" rows={2} placeholder="Priority Support, API Access..." />
+                                        <textarea value={newPlan.features} onChange={e => setNewPlan({ ...newPlan, features: e.target.value })} className="w-full border rounded-lg p-2.5 text-sm" rows={2} placeholder="Priority Support, API Access..." />
                                     </div>
                                 </>
                             ) : (
                                 <>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Pack Name</label>
-                                        <input required type="text" value={newPack.name} onChange={e => setNewPack({...newPack, name: e.target.value})} className="w-full border rounded-lg p-2.5 text-sm" placeholder="e.g. Mega Bundle" />
+                                        <input required type="text" value={newPack.name} onChange={e => setNewPack({ ...newPack, name: e.target.value })} className="w-full border rounded-lg p-2.5 text-sm" placeholder="e.g. Mega Bundle" />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Credits</label>
-                                            <input required type="number" value={newPack.credits} onChange={e => setNewPack({...newPack, credits: parseInt(e.target.value)})} className="w-full border rounded-lg p-2.5 text-sm" />
+                                            <input required type="number" value={newPack.credits} onChange={e => setNewPack({ ...newPack, credits: parseInt(e.target.value) })} className="w-full border rounded-lg p-2.5 text-sm" />
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Price (₹)</label>
-                                            <input required type="number" value={newPack.price} onChange={e => setNewPack({...newPack, price: parseFloat(e.target.value)})} className="w-full border rounded-lg p-2.5 text-sm" />
+                                            <input required type="number" value={newPack.price} onChange={e => setNewPack({ ...newPack, price: parseFloat(e.target.value) })} className="w-full border rounded-lg p-2.5 text-sm" />
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2 pt-2">
-                                        <input type="checkbox" id="popular" checked={newPack.is_popular} onChange={e => setNewPack({...newPack, is_popular: e.target.checked})} className="rounded text-wa focus:ring-wa" />
+                                        <input type="checkbox" id="popular" checked={newPack.is_popular} onChange={e => setNewPack({ ...newPack, is_popular: e.target.checked })} className="rounded text-wa focus:ring-wa" />
                                         <label htmlFor="popular" className="text-sm text-gray-700 font-medium">Mark as Popular</label>
                                     </div>
                                 </>
                             )}
                             <div className="pt-4">
                                 <button type="submit" disabled={creating} className="w-full bg-wa text-white py-2.5 rounded-lg hover:bg-wa-dark font-medium flex items-center justify-center gap-2">
-                                    {creating ? <Loader2 className="animate-spin w-4 h-4"/> : <Plus className="w-4 h-4"/>} Create
+                                    {creating ? <Loader2 className="animate-spin w-4 h-4" /> : <Plus className="w-4 h-4" />} Create
                                 </button>
                             </div>
                         </form>

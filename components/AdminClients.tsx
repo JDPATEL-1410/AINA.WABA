@@ -7,6 +7,7 @@ import {
 import { adminService } from '../services/adminService';
 import { SaaSUser } from '../types';
 import { authService } from '../services/authService';
+import { API_BASE_URL } from '../services/apiConfig';
 
 export const AdminClients: React.FC = () => {
     const [clients, setClients] = useState<SaaSUser[]>([]);
@@ -60,7 +61,7 @@ export const AdminClients: React.FC = () => {
         try {
             const admin = authService.getCurrentUser();
             // Call API
-            const response = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:3000'}/api/users/${selectedClient.id}/credits`, {
+            const response = await fetch(`${API_BASE_URL}/api/users/${selectedClient.id}/credits`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -87,7 +88,7 @@ export const AdminClients: React.FC = () => {
         if (!window.confirm(`Change status of ${client.name} to ${newStatus}?`)) return;
 
         try {
-            await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:3000'}/api/users/${client.id}/status`, {
+            await fetch(`${API_BASE_URL}/api/users/${client.id}/status`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus })

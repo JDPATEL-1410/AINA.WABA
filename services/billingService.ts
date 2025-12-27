@@ -1,15 +1,8 @@
-
 import { Transaction, CreditPack, SubscriptionPlan } from '../types';
 import { authService } from './authService';
+import { API_BASE_URL } from './apiConfig';
 
-const getBaseUrl = () => {
-    const env = (import.meta as any).env;
-    if (env?.VITE_API_URL) return env.VITE_API_URL + '/api';
-    if (env?.PROD) return '/api';
-    return 'http://localhost:3000/api';
-};
-
-const BACKEND_URL = getBaseUrl();
+const BACKEND_URL = `${API_BASE_URL}/api`;
 
 // Mock Data for Fallback
 const MOCK_PACKS: CreditPack[] = [
@@ -82,6 +75,6 @@ export const billingService = {
     },
 
     purchaseCredits: async (packId: string): Promise<boolean> => {
-        return true; 
+        return true;
     }
 };
