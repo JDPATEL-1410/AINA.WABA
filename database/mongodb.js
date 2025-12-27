@@ -11,11 +11,22 @@ const connectDB = async () => {
         if (!MONGODB_URI) {
             throw new Error('MONGODB_URI is not defined in environment variables');
         }
-        await mongoose.connect(MONGODB_URI);
-        console.log('🍃 Connected to MongoDB');
+
+        if (mongoose.connection.readyState >= 1) {
+            return;
+        }
+
+        await mongoose.connect(MONGODB_URI, {
+            serverSelectionTimeoutMS: 30000, // Wait 30s before failing
+            socketTimeoutMS: 45000,
+        });
+        console.log('🍃 Connected to MongoDB Successfully');
     } catch (error) {
         console.error('❌ MongoDB Connection Error:', error.message);
-        process.exit(1);
+        if (error.message.includes('whitelsited') || error.message.includes('IP address')) {
+            console.error('👉 PRO TIP: Double check your MongoDB Atlas "Network Access" for 0.0.0.0/0');
+        }
+        throw error; // Rethrow to let startServer handle it
     }
 };
 

@@ -50,10 +50,6 @@ const upload = multer({ storage: storage });
 // --- DATABASE CONNECTION (MONGODB) ---
 import connectDB, { User, Ledger, Automation, Plan, Pack, BusinessProfile } from './database/mongodb.js';
 
-connectDB();
-
-
-
 // --- INITIAL DATA SEEDING ---
 const seedData = async () => {
     try {
@@ -554,9 +550,20 @@ app.get('*', (req, res) => {
 
 
 
-if (process.env.NODE_ENV !== 'production' || process.env.VITE_DEV_SERVER) {
-    httpServer.listen(PORT, () => console.log(`🚀 Server running on port ${PORT} | Database: MongoDB`));
-}
+const startServer = async () => {
+    try {
+        await connectDB();
+        await seedData();
+
+        if (process.env.NODE_ENV !== 'production' || process.env.VITE_DEV_SERVER) {
+            httpServer.listen(PORT, () => console.log(`🚀 Server running on port ${PORT} | Database: MongoDB`));
+        }
+    } catch (err) {
+        console.error("Failed to start server:", err);
+    }
+};
+
+startServer();
 
 export default app;
 
